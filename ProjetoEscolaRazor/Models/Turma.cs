@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
-namespace ApiProjetoEscola.Model
+namespace ProjetoEscolaRazor.Model
 {
     [Table("Turmas")]
     public class Turma

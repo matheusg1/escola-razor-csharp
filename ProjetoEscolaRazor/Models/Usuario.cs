@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ApiProjetoEscola.Model
+namespace ProjetoEscolaRazor.Model
 {
     [Table("Usuarios")]
     public class Usuario

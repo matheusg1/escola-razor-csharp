@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System;
 
-namespace ApiProjetoEscola.Model
+namespace ProjetoEscolaRazor.Model
 {
     [Table("Alunos")]
     public class Aluno

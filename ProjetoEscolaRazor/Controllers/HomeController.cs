@@ -1,4 +1,4 @@
-﻿using ApiProjetoEscola.Model;
+﻿using ProjetoEscolaRazor.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

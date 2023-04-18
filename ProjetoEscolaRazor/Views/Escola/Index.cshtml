@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ApiProjetoEscola.Model.Escola>
+﻿@model IEnumerable<ProjetoEscolaRazor.Model.Escola>
 
 @{
     ViewData["Title"] = "Index";
@@ -44,7 +44,7 @@
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new {  id = item.EscolaId }) |
-                @Html.ActionLink("Details", "Details", new { id=item.EscolaId }) |
+                @Html.ActionLink("Details", "Details", new { id=item.EscolaId }) |                
                 @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
             </td>
         </tr>

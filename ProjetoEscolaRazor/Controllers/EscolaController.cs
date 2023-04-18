@@ -1,4 +1,4 @@
-﻿using ApiProjetoEscola.Model;
+﻿using ProjetoEscolaRazor.Model;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Collections.Generic;
@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using FluentResults;
+using ProjetoEscolaRazor.DTO;
 
 namespace ProjetoEscolaRazor.Controllers
 {
@@ -25,9 +27,12 @@ namespace ProjetoEscolaRazor.Controllers
 
             return View(listaEscolas);
         }
-        public async Task<IActionResult> Edit()
+
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
         {
-            return View();
+            var escola = await GetEscolaById(id);
+            return View(escola);
         }
 
         [Route("Details/{id}")]
@@ -35,6 +40,56 @@ namespace ProjetoEscolaRazor.Controllers
         {
             var escola = await GetEscolaById(id);
             return View(escola);
+        }
+        
+        public async Task<IActionResult> Create()
+        {
+            return View();
+        }
+
+        [HttpPost]        
+        public async Task<IActionResult> Create([Bind("EscolaId, Nome, Endereco")] CreateEscolaRequest escola)
+        {
+            if (ModelState.IsValid)
+            {
+                var create = await CreateEscola(escola);
+
+                if (create.IsFailed)
+                {
+                    throw new Exception("FALHOU");
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(escola);
+        }
+
+
+        /*public async Task<List<Escola>> CreateEscola()
+        {
+            RestClient client = new RestClient(Baseurl);
+
+            RestRequest request = new RestRequest("Escola/create", Method.Post);
+                //.AddJsonBody();
+
+            var response = await client.ExecuteAsync(request);
+        }*/
+
+        public async Task<Result> CreateEscola(CreateEscolaRequest escola)
+        {
+            RestClient client = new RestClient(Baseurl);
+
+            RestRequest request = new RestRequest("Escola/create", Method.Post).AddJsonBody(escola);
+
+            var response = await client.ExecuteAsync(request);
+
+            var result = (int) response.StatusCode;
+
+            if(result != 200)
+            {
+                return Result.Fail("");
+            }
+            return Result.Ok();
         }
 
         public async Task<List<Escola>> GetEscolas()
