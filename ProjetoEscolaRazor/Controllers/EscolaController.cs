@@ -8,17 +8,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using FluentResults;
 using ProjetoEscolaRazor.DTO;
+using Microsoft.Extensions.Configuration;
 
 namespace ProjetoEscolaRazor.Controllers
 {
     public class EscolaController : Controller
     {
-        private readonly ILogger<EscolaController> _logger;
-        string Baseurl = "https://localhost:44393/";
+        private IConfiguration _config;
+        readonly string BaseUrl;
 
-        public EscolaController(ILogger<EscolaController> logger)
+        public EscolaController(IConfiguration config)
         {
-            _logger = logger;
+            _config = config;
+            BaseUrl = config.GetConnectionString("baseUrl");
         }
 
         public async Task<IActionResult> Index()
@@ -66,7 +68,7 @@ namespace ProjetoEscolaRazor.Controllers
 
         public async Task<Result> CreateEscola(CreateEscolaRequest escola)
         {
-            RestClient client = new RestClient(Baseurl);
+            RestClient client = new RestClient(BaseUrl);
 
             RestRequest request = new RestRequest("Escola/create", Method.Post).AddJsonBody(escola);
 
@@ -83,7 +85,7 @@ namespace ProjetoEscolaRazor.Controllers
 
         public async Task<List<Escola>> GetEscolas()
         {
-            RestClient client = new RestClient(Baseurl);
+            RestClient client = new RestClient(BaseUrl);
 
             RestRequest request = new RestRequest("Escola/findAll", Method.Get);
 
@@ -105,7 +107,7 @@ namespace ProjetoEscolaRazor.Controllers
 
         public async Task<Escola> GetEscolaById(int id)
         {
-            RestClient client = new RestClient(Baseurl);
+            RestClient client = new RestClient(BaseUrl);
 
             RestRequest request = new RestRequest("Escola/findById", Method.Get).AddQueryParameter("id", id);
 
@@ -152,7 +154,7 @@ namespace ProjetoEscolaRazor.Controllers
         public async Task<Result> DeleteEscola(int id)
         {
 
-            RestClient client = new RestClient(Baseurl);
+            RestClient client = new RestClient(BaseUrl);
 
             RestRequest request = new RestRequest("Escola/Delete", Method.Delete).AddQueryParameter("id", id);
 
