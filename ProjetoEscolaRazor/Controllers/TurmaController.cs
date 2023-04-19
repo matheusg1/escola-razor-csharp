@@ -10,23 +10,23 @@ using System.Threading.Tasks;
 using System;
 using ProjetoEscolaRazor.DTO;
 using FluentResults;
+using ProjetoEscolaRazor.Services;
 
 namespace ProjetoEscolaRazor.Controllers
 {
     public class TurmaController : Controller
-    {        
-        private IConfiguration _config;
-        readonly string BaseUrl;
+    {                
+        EscolaService _escolaService;
+        TurmaService _turmaService;        
 
-        public TurmaController(IConfiguration config)
-        {            
-            _config = config;
-            BaseUrl = config.GetConnectionString("baseUrl");
+        public TurmaController(TurmaService turmaService)
+        {                        
+            _turmaService = turmaService;
         }
         // GET: TurmaController
         public async Task<ActionResult> Index()
         {
-            var listaTurmas = await GetTurmas();
+            var listaTurmas = await _turmaService.GetTurmas();
 
             return View(listaTurmas);
         }
@@ -34,7 +34,7 @@ namespace ProjetoEscolaRazor.Controllers
         // GET: TurmaController/Details/5
         public async Task<ActionResult> Details(int id)
         {
-            var turma = await GetTurmaById(id);
+            var turma = await _turmaService.GetTurmaById(id);
             return View(turma);
         }
 
@@ -52,7 +52,7 @@ namespace ProjetoEscolaRazor.Controllers
         {
             if (ModelState.IsValid)
             {
-                var create = await CreateTurma(turma);
+                var create = await _turmaService.CreateTurma(turma);
 
                 if (create.IsFailed)
                 {
@@ -64,27 +64,10 @@ namespace ProjetoEscolaRazor.Controllers
             return View(turma);
         }
 
-        public async Task<Result> CreateTurma(CreateTurmaRequest turma)
-        {
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Turma/create", Method.Post).AddJsonBody(turma);
-
-            var response = await client.ExecuteAsync(request);
-
-            var result = (int)response.StatusCode;
-
-            if (result >= 200 && result < 100)
-            {
-                return Result.Fail("");
-            }
-            return Result.Ok();
-        }
-
         // GET: TurmaController/Edit/5
         public async Task<ActionResult> Edit(int id)
         {
-            var turma = await GetTurmaById(id);
+            var turma = await _turmaService.GetTurmaById(id);
             return View(turma);
         }
 
@@ -122,50 +105,6 @@ namespace ProjetoEscolaRazor.Controllers
             {
                 return View();
             }
-        }
-
-        public async Task<List<Turma>> GetTurmas()
-        {
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Turma/findAll", Method.Get);
-
-            var response = await client.ExecuteAsync(request);
-
-            if ((int)response.StatusCode == 404)
-            {
-                throw new Exception("BLABLA1");
-            }
-            else if ((int)response.StatusCode == 403)
-            {
-                throw new Exception("22");
-            }
-            var resultadoRequest = response.Content;
-
-            var lista = JsonConvert.DeserializeObject<List<Turma>>(resultadoRequest);
-            return lista;
-        }
-
-        public async Task<Turma> GetTurmaById(int id)
-        {
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Turma/findById", Method.Get).AddQueryParameter("id", id);
-
-            var response = await client.ExecuteAsync(request);
-
-            if ((int)response.StatusCode == 404)
-            {
-                throw new Exception("BLABLA1");
-            }
-            else if ((int)response.StatusCode == 403)
-            {
-                throw new Exception("22");
-            }
-            var resultadoRequest = response.Content;
-
-            var lista = JsonConvert.DeserializeObject<Turma>(resultadoRequest);
-            return lista;
         }
     }
 }

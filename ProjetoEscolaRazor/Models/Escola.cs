@@ -24,10 +24,11 @@ namespace ProjetoEscolaRazor.Model
             }
         }
 
-        public Escola(string nome, string endereco)
+        public Escola(int escolaId, string nome, string endereco)
         {
+            EscolaId = escolaId;
             Nome = nome;
-            Endereco = endereco;
+            Endereco = endereco;            
         }
     }
 }

@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using FluentResults;
 using ProjetoEscolaRazor.DTO;
 using Microsoft.Extensions.Configuration;
+using ProjetoEscolaRazor.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace ProjetoEscolaRazor.Controllers
 {
@@ -16,31 +18,42 @@ namespace ProjetoEscolaRazor.Controllers
     {
         private IConfiguration _config;
         readonly string BaseUrl;
+        private EscolaService _escolaService;
 
-        public EscolaController(IConfiguration config)
+        public EscolaController(IConfiguration config, EscolaService escolaService)
         {
             _config = config;
             BaseUrl = config.GetConnectionString("baseUrl");
+            _escolaService = escolaService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var listaEscolas = await GetEscolas();
+            var listaEscolas = await _escolaService.GetEscolas();
 
             return View(listaEscolas);
         }
 
-        [Route("Edit/{id}")]
+        //[Route("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
-            var escola = await GetEscolaById(id);
+            var escola = await _escolaService.GetEscolaById(id);
             return View(escola);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, IFormCollection collection)
+        {
+            var escola = new Escola(int.Parse(collection["EscolaId"]), collection["nome"], collection["endereco"]);
+            var resultado = await _escolaService.EditEscola(escola);
+
+            return RedirectToAction(nameof(Index));            
         }
 
         [Route("Details/{id}")]
         public async Task<IActionResult> Details(int id)
         {
-            var escola = await GetEscolaById(id);
+            var escola = await _escolaService.GetEscolaById(id);
             return View(escola);
         }
 
@@ -54,7 +67,7 @@ namespace ProjetoEscolaRazor.Controllers
         {
             if (ModelState.IsValid)
             {
-                var create = await CreateEscola(escola);
+                var create = await _escolaService.CreateEscola(escola);
 
                 if (create.IsFailed)
                 {
@@ -66,72 +79,12 @@ namespace ProjetoEscolaRazor.Controllers
             return View(escola);
         }
 
-        public async Task<Result> CreateEscola(CreateEscolaRequest escola)
-        {
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Escola/create", Method.Post).AddJsonBody(escola);
-
-            var response = await client.ExecuteAsync(request);
-
-            var result = (int)response.StatusCode;
-
-            if (result >= 200 && result < 100)
-            {
-                return Result.Fail("");
-            }
-            return Result.Ok();
-        }
-
-        public async Task<List<Escola>> GetEscolas()
-        {
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Escola/findAll", Method.Get);
-
-            var response = await client.ExecuteAsync(request);
-
-            if ((int)response.StatusCode == 404)
-            {
-                throw new Exception("BLABLA1");
-            }
-            else if ((int)response.StatusCode == 403)
-            {
-                throw new Exception("22");
-            }
-            var resultadoRequest = response.Content;
-
-            var lista = JsonConvert.DeserializeObject<List<Escola>>(resultadoRequest);
-            return lista;
-        }
-
-        public async Task<Escola> GetEscolaById(int id)
-        {
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Escola/findById", Method.Get).AddQueryParameter("id", id);
-
-            var response = await client.ExecuteAsync(request);
-
-            if ((int)response.StatusCode == 404)
-            {
-                throw new Exception("BLABLA1");
-            }
-            else if ((int)response.StatusCode == 403)
-            {
-                throw new Exception("22");
-            }
-            var resultadoRequest = response.Content;
-
-            var lista = JsonConvert.DeserializeObject<Escola>(resultadoRequest);
-            return lista;
-        }
 
         //[HttpGet]
         //[Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var escola = await GetEscolaById(id);
+            var escola = await _escolaService.GetEscolaById(id);
 
             return View(escola);
         }
@@ -141,7 +94,7 @@ namespace ProjetoEscolaRazor.Controllers
         [ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var delete = await DeleteEscola(id);
+            var delete = await _escolaService.DeleteEscola(id);
 
             if (delete.IsFailed)
             {
@@ -149,24 +102,6 @@ namespace ProjetoEscolaRazor.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<Result> DeleteEscola(int id)
-        {
-
-            RestClient client = new RestClient(BaseUrl);
-
-            RestRequest request = new RestRequest("Escola/Delete", Method.Delete).AddQueryParameter("id", id);
-
-            var response = await client.ExecuteAsync(request);
-
-            var result = (int)response.StatusCode;
-
-            if (result >= 200 && result < 100)
-            {
-                return Result.Fail("");
-            }
-            return Result.Ok();
         }
 
     }
