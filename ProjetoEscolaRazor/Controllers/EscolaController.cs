@@ -41,13 +41,13 @@ namespace ProjetoEscolaRazor.Controllers
             var escola = await GetEscolaById(id);
             return View(escola);
         }
-        
+
         public async Task<IActionResult> Create()
         {
             return View();
         }
 
-        [HttpPost]        
+        [HttpPost]
         public async Task<IActionResult> Create([Bind("EscolaId, Nome, Endereco")] CreateEscolaRequest escola)
         {
             if (ModelState.IsValid)
@@ -64,17 +64,6 @@ namespace ProjetoEscolaRazor.Controllers
             return View(escola);
         }
 
-
-        /*public async Task<List<Escola>> CreateEscola()
-        {
-            RestClient client = new RestClient(Baseurl);
-
-            RestRequest request = new RestRequest("Escola/create", Method.Post);
-                //.AddJsonBody();
-
-            var response = await client.ExecuteAsync(request);
-        }*/
-
         public async Task<Result> CreateEscola(CreateEscolaRequest escola)
         {
             RestClient client = new RestClient(Baseurl);
@@ -83,9 +72,9 @@ namespace ProjetoEscolaRazor.Controllers
 
             var response = await client.ExecuteAsync(request);
 
-            var result = (int) response.StatusCode;
+            var result = (int)response.StatusCode;
 
-            if(result != 200)
+            if (result >= 200 && result < 100)
             {
                 return Result.Fail("");
             }
@@ -134,6 +123,48 @@ namespace ProjetoEscolaRazor.Controllers
 
             var lista = JsonConvert.DeserializeObject<Escola>(resultadoRequest);
             return lista;
+        }
+
+        //[HttpGet]
+        //[Route("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var escola = await GetEscolaById(id);
+
+            return View(escola);
+        }
+
+        
+        [HttpPost]
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var delete = await DeleteEscola(id);
+
+            if (delete.IsFailed)
+            {
+                throw new Exception("FALHOU");
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<Result> DeleteEscola(int id)
+        {
+
+            RestClient client = new RestClient(Baseurl);
+
+            RestRequest request = new RestRequest("Escola/Delete", Method.Delete).AddQueryParameter("id", id);
+
+            var response = await client.ExecuteAsync(request);
+
+            var result = (int)response.StatusCode;
+
+            if (result >= 200 && result < 100)
+            {
+                return Result.Fail("");
+            }
+            return Result.Ok();
         }
 
     }
